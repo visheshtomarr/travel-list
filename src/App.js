@@ -1,17 +1,26 @@
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: false },
-  { id: 3, description: "Shirts", quantity: 4, packed: false },
-];
+// const initialItems = [
+//   { id: 1, description: "Passports", quantity: 2, packed: false },
+//   { id: 2, description: "Socks", quantity: 12, packed: false },
+//   { id: 3, description: "Shirts", quantity: 4, packed: false },
+// ];
 
 function App() {
+  const [items, setItems] = useState([]);
+
+  const handleAddItems = (item) => {
+    // Without mutating the original 'items' array,
+    // we added a new item.
+    // In React, one should never change the any state directly. 
+    setItems(items => [...items, item]);
+  }
+
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
+      <Form onAddItems={handleAddItems} />
+      <PackingList items={items} />
       <Stats />
     </div>
   );
@@ -21,9 +30,9 @@ function Logo() {
   return <h1>Let's Pack</h1>
 }
 
-function Form() {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState('');
-  const [quantity, setQuantity] = useState(2);
+  const [quantity, setQuantity] = useState(1);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -37,6 +46,8 @@ function Form() {
       quantity,
       packed: false
     }
+
+    onAddItems(newItem);
 
     setDescription('');
     setQuantity(1);
@@ -65,11 +76,11 @@ function Form() {
   )
 }
 
-function PackingList() {
+function PackingList({ items }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map(item =>
+        {items.map(item =>
           <Item item={item} key={item.id} />
         )}
       </ul>
