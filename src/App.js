@@ -3,22 +3,32 @@ import { useState } from "react";
 function App() {
   const [items, setItems] = useState([]);
 
+  // The main goal is to render an updated list of items rather 
+  // than updating the state of a single item. That's why we perform operation
+  // on the whole 'items' array at the same time.
   const handleAddItems = (item) => {
-    // Without mutating the original 'items' array,
-    // we added a new item.
-    // In React, one should never change the any state directly. 
     setItems(items => [...items, item]);
   }
 
-  const handleDeleteItems = (id) => {
+  const handleDeleteItem = (id) => {
     setItems(items => items.filter(item => item.id !== id));
+  }
+
+  const handleToggleItem = (id) => {
+    setItems(items => items.map(item =>
+      item.id === id ? { ...item, packed: !item.packed } : item
+    ))
   }
 
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems} />
-      <PackingList items={items} onDeleteItems={handleDeleteItems} />
+      <PackingList
+        items={items}
+        onDeleteItem={handleDeleteItem}
+        onToggleItem={handleToggleItem}
+      />
       <Stats />
     </div>
   );
@@ -44,7 +54,7 @@ function Form({ onAddItems }) {
       quantity,
       packed: false
     }
-
+    console.log(newItem);
     onAddItems(newItem);
 
     setDescription('');
@@ -74,12 +84,17 @@ function Form({ onAddItems }) {
   )
 }
 
-function PackingList({ items, onDeleteItems }) {
+function PackingList({ items, onDeleteItem, onToggleItem }) {
   return (
     <div className="list">
       <ul>
         {items.map(item =>
-          <Item item={item} onDeleteItems={onDeleteItems} key={item.id} />
+          <Item
+            item={item}
+            onDeleteItem={onDeleteItem}
+            onToggleItem={onToggleItem}
+            key={item.id}
+          />
         )}
       </ul>
     </div>
@@ -94,13 +109,18 @@ function Stats() {
   )
 }
 
-function Item({ item, onDeleteItems }) {
+function Item({ item, onDeleteItem, onToggleItem }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => onToggleItem(item.id)}
+      />
       <span style={item.packed ? { textDecoration: 'line-through' } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button onClick={() => onDeleteItems(item.id)}>❌</button>
+      <button onClick={() => onDeleteItem(item.id)}>❌</button>
     </li>
   )
 }
